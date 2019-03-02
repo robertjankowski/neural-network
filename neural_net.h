@@ -7,13 +7,13 @@
 class NeuralNet
 {
     /**
-     * ``sizes`` contains numbers of neurons in each layer
+     * ``_sizes`` contains numbers of neurons in each layer
      *  first layer is assumed to be input layer (is without bias)
     **/
-    int numLayers;
-    std::vector<int> sizes;
-    std::vector<Matrix<double>> weights;
-    std::vector<Matrix<double>> biases;
+    int _numLayers;
+    std::vector<int> _sizes;
+    std::vector<Matrix<double>> _weights;
+    std::vector<Matrix<double>> _biases;
 
   public:
     NeuralNet(std::vector<int>);

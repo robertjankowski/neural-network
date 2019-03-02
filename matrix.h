@@ -41,6 +41,7 @@ class Matrix
     Matrix transpose();
     void setOneRow(int, std::vector<T>);
     std::vector<T> getOneRow(int);
+    Matrix<T> getRows(int, int);
     Matrix<double> convertToDouble();
     Matrix<T> shuffleRows();
     Matrix<T> concatMatrix(Matrix<T> &);
@@ -236,6 +237,17 @@ std::vector<T> Matrix<T>::getOneRow(int pos)
         oneRow.push_back(at(pos, i));
     }
     return oneRow;
+}
+
+template <class T>
+Matrix<T> Matrix<T>::getRows(int from, int to)
+{
+    Matrix<T> out(to - from, cols());
+    for (int i = from; i < to; ++i)
+    {
+        out.setOneRow(i - from, getOneRow(i));
+    }
+    return out;
 }
 
 template <class T>
