@@ -10,14 +10,14 @@ NeuralNet::NeuralNet(std::vector<int> s) : _sizes(s)
     _numLayers = _sizes.size();
     for (unsigned int i = 1; i < _sizes.size(); ++i)
     {
-        int rows = _sizes.at(i);
-        Matrix<double> bias(rows, 1);
+        int cols = _sizes.at(i);
+        Matrix<double> bias(1, cols);
         bias.fillGauss(0, 1); // mean=0, variance=1
         _biases.push_back(bias);
     }
     std::vector<int> from(_sizes.begin() + 1, _sizes.end());
     std::vector<int> to(s.begin(), s.end() - 1);
-    for (auto i : zip(from, to))
+    for (auto i : zip(to, from))
     {
         Matrix<double> weight(i.at(0), i.at(1));
         weight.fillGauss(0, 1); // mean=0, variance=1
@@ -31,7 +31,8 @@ Matrix<double> NeuralNet::feedforward(Matrix<double> a)
     {
         auto b = i.at(0);
         auto w = i.at(1);
-        auto dot = mul(w, a) + b;
+        // for tests in other way
+        auto dot = mul(a, w) + b;
         a = applyActivation(Activation::sigmoid, dot);
     }
     return a;
@@ -69,7 +70,7 @@ void NeuralNet::SGD(std::vector<Matrix<double>> trainingData, int epochs,
             std::vector<Matrix<double>> vec = {inputPartial, labelsPartial};
             miniBatches.push_back(vec);
         }
-        std::cout << "minibatchs size: " << miniBatches.size() << '\n';
+        std::cout << "minibatch size: " << miniBatches.size() << '\n';
         for (auto miniBatch : miniBatches)
         {
             // TODO: finish update mini batch fuction
@@ -111,8 +112,8 @@ std::vector<std::vector<Matrix<double>>> NeuralNet::backprop(Matrix<double> x,
     for (auto i : zip(_biases, _weights))
     {
         auto b = i.at(0), w = i.at(1);
-        // TODO: ERROR: check sizes of matrices
-        auto z = mul<double>(w, activation) + b;
+        // TODO: ERROR: check sizes of matrices -> in different way
+        auto z = mul<double>(activation, w) + b;
         zs.push_back(z);
         activation = applyActivation(Activation::sigmoid, z);
         activations.push_back(activation);
@@ -121,20 +122,37 @@ std::vector<std::vector<Matrix<double>>> NeuralNet::backprop(Matrix<double> x,
     auto delta = costDerivative(activations.at(activations.size() - 1), y);
     auto sigPrime = applyActivation(Activation::sigmoidDerivative,
                                     zs.at(zs.size() - 1));
-    auto deltaSigPrime = mul<double>(delta, sigPrime);
+    Matrix<double> deltaSigPrime(delta.rows(), delta.cols());
+    for (int i = 0; i < delta.rows(); ++i)
+    {
+        auto deltaRow = delta.getOneRow(i);
+        auto sigPrimeRow = sigPrime.getOneRow(i);
+        std::vector<double> counter;
+        for (unsigned int j = 0; j < deltaRow.size(); ++j)
+        {
+            counter.push_back(deltaRow.at(i) * sigPrimeRow.at(i));
+        }
+        deltaSigPrime.setOneRow(i, counter);
+    }
+    // auto deltaSigPrime = mul<double>(delta, sigPrime);
     nablaB.at(nablaB.size() - 1) = deltaSigPrime;
     auto forNablaW = activations.at(activations.size() - 2).transpose();
-    nablaW.at(nablaW.size() - 1) = mul<double>(deltaSigPrime, forNablaW);
+    nablaW.at(nablaW.size() - 1) = mul<double>(forNablaW, deltaSigPrime);
 
     for (int l = 2; l < _numLayers; ++l)
     {
         auto z = zs.at(zs.size() - l);
         auto sp = applyActivation(Activation::sigmoidDerivative, z);
         auto w = _weights.at(_weights.size() - l + 1).transpose();
-        auto wMul = mul<double>(w, delta);
+        auto wMul = mul<double>(delta, w);
+
+        // TODO: issuse with matrices sizes - there is `*` not `dot`
+        // but `delta` is different size than `wMul` and `sp`
         delta = mul<double>(wMul, sp);
         nablaB.at(nablaB.size() - l + 1) = delta;
         activation = activations.at(activations.size() - l + 1).transpose();
+        delta.showShape();
+        activation.showShape();
         auto forNablaW = mul<double>(delta, activation);
         nablaW.at(nablaW.size() - l + 1) = mul<double>(delta, forNablaW);
     }
@@ -164,7 +182,6 @@ void NeuralNet::updateMiniBatch(std::vector<Matrix<double>> miniBatch, double et
     auto labels = miniBatch.at(1);
     for (int i = 0; i < features.rows(); ++i)
     {
-
         Matrix<double> f(1, features.cols());
         f.setOneRow(0, features.getOneRow(i));
         Matrix<double> l(1, labels.cols());

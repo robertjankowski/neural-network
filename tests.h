@@ -131,7 +131,7 @@ void testNeuralNet()
     // 3 - output neurons
     std::vector<int> sizes = {4, 8, 3};
     NeuralNet nn(sizes);
-    Matrix<double> inputMatrix(4, 1);
+    Matrix<double> inputMatrix(1, 4);
     inputMatrix.fillGauss(0, 1);
     nn.feedforward(inputMatrix);
 
