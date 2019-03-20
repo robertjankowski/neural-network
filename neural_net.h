@@ -17,12 +17,11 @@ class NeuralNet
 
   public:
     NeuralNet(std::vector<int>);
+    std::vector<Matrix<double>> getBiases() { return _biases; }
+    std::vector<Matrix<double>> getWeights() { return _weights; }
     Matrix<double> feedforward(Matrix<double>);
-    void SGD(std::vector<Matrix<double>>, int, int, double,
-             std::vector<Matrix<double>> = std::vector<Matrix<double>>());
-    Matrix<double> costDerivative(Matrix<double>, Matrix<double>);
-    std::vector<std::vector<Matrix<double>>> backprop(Matrix<double>, Matrix<double>);
-    void updateMiniBatch(std::vector<Matrix<double>>, double);
+
+    int predict(Matrix<double>);
 };
 
 #endif // !__NEURAL_NET__

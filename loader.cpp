@@ -36,7 +36,7 @@ Loader::Loader(const char *path, char delimiter)
 Matrix<double> Loader::getInput()
 {
     // shape: 150x4
-    Matrix<double> features(_iris.size(), _iris[0].getFeatures().size());
+    Matrix<double> features(_iris.size(), _iris[0].getFeatures().cols());
     for (int i = 0; i < features.rows(); ++i)
     {
         features.setOneRow(i, _iris[i].getFeatures());

@@ -126,29 +126,69 @@ void testNeuralNet()
     oneHot.toOneHot(labels);
     auto oneHotLabels = oneHot.getOneHot().convertToDouble();
 
+    // input         - X - shape: 150x4
+    // oneHotLabeles - y - shape: 150x3
+    // covert to vector((X[0], y[0]), (X[1], y[1]), ... )
+
     // build NN
     // 4 - input  neurons
     // 3 - output neurons
     std::vector<int> sizes = {4, 8, 3};
     NeuralNet nn(sizes);
-    Matrix<double> inputMatrix(1, 4);
+
+    // test sizes of weights and biases
+    std::cout << "Biases shape" << '\n';
+    auto biases = nn.getBiases();
+    for (auto &bias : biases)
+    {
+        bias.showShape(); // (8, 1), (3, 1)
+    }
+    std::cout << "Weights shape" << std::endl;
+    auto weights = nn.getWeights();
+    for (auto &weight : weights)
+    {
+        weight.showShape(); // (8, 4), (3, 8)
+    }
+
+    // test feedforward function
+    std::cout << "Feedforward function" << std::endl;
+    Matrix<double> inputMatrix(4, 1);
     inputMatrix.fillGauss(0, 1);
-    nn.feedforward(inputMatrix);
+    auto output = nn.feedforward(inputMatrix);
+    std::cout << output << std::endl;
 
-    // create training data
-    std::vector<Matrix<double>> trainingData;
-    trainingData.push_back(input);
-    trainingData.push_back(oneHotLabels);
+    // test predict
+    std::cout << "Predict random" << std::endl;
+    int predict = nn.predict(inputMatrix);
+    switch (predict)
+    {
+    case 0:
+        std::cout << "Iris-setosa" << std::endl;
+        break;
+    case 1:
+        std::cout << "Iris-versicolor" << std::endl;
+        break;
+    case 2:
+        std::cout << "Iris-virginica" << std::endl;
+        break;
+    default:
+        break;
+    }
 
-    auto trainTestData = trainTestSplit(trainingData, 0.25);
+    // TODO: create training data
+    // std::vector<Matrix<double>> trainingData;
+    // trainingData.push_back(input);
+    // trainingData.push_back(oneHotLabels);
 
-    auto testData = trainTestData.at(0);
-    auto trainData = trainTestData.at(1);
+    // auto trainTestData = trainTestSplit(trainingData, 0.25);
 
-    int epochs = 10;
-    int miniBatchSize = 5;
-    double eta = 0.01;
-    nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
+    // auto testData = trainTestData.at(0);
+    // auto trainData = trainTestData.at(1);
+
+    // int epochs = 10;
+    // int miniBatchSize = 5;
+    // double eta = 0.01;
+    // nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
 }
 
 #endif // !__TESTS__

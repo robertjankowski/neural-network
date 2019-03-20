@@ -40,6 +40,7 @@ class Matrix
     void showShape();
     Matrix transpose();
     void setOneRow(int, std::vector<T>);
+    void setOneRow(int, Matrix<T>);
     std::vector<T> getOneRow(int);
     Matrix<T> getRows(int, int);
     Matrix<double> convertToDouble();
@@ -224,6 +225,19 @@ void Matrix<T>::setOneRow(int row, std::vector<T> input)
     for (int i = 0; i < cols(); ++i)
     {
         set(row, i, input.at(i));
+    }
+}
+
+template <class T>
+void Matrix<T>::setOneRow(int row, Matrix<T> input)
+{
+    if (input.cols() != cols())
+    {
+        throw std::invalid_argument("Input vector size need to be the same as col()");
+    }
+    for (int i = 0; i < cols(); ++i)
+    {
+        set(row, i, input.at(0, i));
     }
 }
 
