@@ -4,6 +4,10 @@
 #include <vector>
 #include "zip.h"
 #include <algorithm>
+#include <cmath>
+#include <random>
+
+std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);
 
 NeuralNet::NeuralNet(std::vector<int> s) : _sizes(s)
 {
@@ -38,9 +42,61 @@ Matrix<double> NeuralNet::feedforward(Matrix<double> a)
     return a;
 }
 
-int NeuralNet::predict(Matrix<double> input)
+int NeuralNet::predict(Matrix<double> &input)
 {
     auto output = feedforward(input);
     int argMax = std::distance(output.begin(), std::max_element(output.begin(), output.end()));
     return argMax;
+}
+
+double NeuralNet::loss(Matrix<double> &yTrue, Matrix<double> &yPred)
+{
+    // mean squared error - MSE
+    double l;
+    if (yTrue.rows() != yPred.rows())
+    {
+        std::cerr << "Wrong matrices shape" << std::endl;
+    }
+    for (int i = 0; i < yTrue.rows(); ++i)
+    {
+        l += pow(yTrue.at(i, 0) - yPred.at(i, 0), 2);
+    }
+    return sqrt(l);
+}
+
+void NeuralNet::SGD(std::vector<std::vector<Matrix<double>>> trainData, int epochs,
+                    int miniBatchSize, double eta, std::vector<std::vector<Matrix<double>>> testData)
+{
+
+    for (int i = 0; i < epochs; ++i)
+    {
+        // shuffle training data
+
+        // create minibatches
+
+        // for m in minibatches: update_mini_batch
+
+        // print loss
+
+        std::cout << "Epoch: " << i << "/" << epochs << " complete" << std::endl;
+    }
+}
+
+std::vector<std::vector<Matrix<double>>> convertData(Matrix<double> X, Matrix<double> y)
+{
+    /**
+     * Input: X shape : (features, no. of instances)
+     *        y shape : (labels,   no. of instances)
+     * 
+     * Output: vector < vector < X', y' > >
+     *    where X' shape : (features, 1)
+     *          y' shape : (labels,   1)
+     */
+    std::vector<std::vector<Matrix<double>>> data;
+    for (int i = 0; i < X.cols(); ++i)
+    {
+        std::vector<Matrix<double>> v = {X.getOneCol(i), y.getOneCol(i)};
+        data.push_back(v);
+    }
+    return data;
 }

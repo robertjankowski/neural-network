@@ -42,6 +42,7 @@ class Matrix
     void setOneRow(int, std::vector<T>);
     void setOneRow(int, Matrix<T>);
     std::vector<T> getOneRow(int);
+    Matrix<T> getOneCol(int);
     Matrix<T> getRows(int, int);
     Matrix<double> convertToDouble();
     Matrix<T> shuffleRows();
@@ -53,7 +54,9 @@ class Matrix
     template <class U>
     friend Matrix<U> mul(Matrix<U> &, Matrix<U> &);
     template <class U>
-    friend std::vector<std::vector<Matrix<U>>> trainTestSplit(std::vector<Matrix<U>>, double);
+    friend std::tuple<std::vector<std::vector<Matrix<U>>>,
+                      std::vector<std::vector<Matrix<U>>>>
+    trainTestSplit(std::vector<std::vector<Matrix<U>>>, double);
 };
 
 template <class T>
@@ -198,7 +201,7 @@ void Matrix<T>::showShape()
 {
     std::tuple<int, int> shape = getShape();
     std::cout << "(" << std::get<0>(shape) << ","
-              << std::get<1>(shape) << ")" << std::endl;
+              << std::get<1>(shape) << ")";
 }
 
 template <class T>
@@ -251,6 +254,17 @@ std::vector<T> Matrix<T>::getOneRow(int pos)
         oneRow.push_back(at(pos, i));
     }
     return oneRow;
+}
+
+template <class T>
+Matrix<T> Matrix<T>::getOneCol(int pos)
+{
+    Matrix<T> oneColMat(rows(), 1);
+    for (int i = 0; i < rows(); ++i)
+    {
+        oneColMat.set(i, 0, at(i, pos));
+    }
+    return oneColMat;
 }
 
 template <class T>
@@ -379,36 +393,28 @@ Matrix<U> mul(Matrix<U> &A, Matrix<U> &B)
 }
 
 template <class U>
-std::vector<std::vector<Matrix<U>>> trainTestSplit(std::vector<Matrix<U>> X, double testSize)
+std::tuple<std::vector<std::vector<Matrix<U>>>,
+           std::vector<std::vector<Matrix<U>>>>
+trainTestSplit(std::vector<std::vector<Matrix<U>>> data, double testSize)
 {
+    unsigned int testCol = (int)(data.size() * testSize);
 
-    // concat matrices, shuffle and split
-    Matrix<U> features = X.at(0);
-    Matrix<U> labels = X.at(1);
-    Matrix<U> all = features.concatMatrix(labels);
-    Matrix<U> allRandom = all.shuffleRows();
+    std::vector<std::vector<Matrix<U>>> test;
+    std::vector<std::vector<Matrix<U>>> train;
 
-    int testRows = int(features.rows() * testSize);
-    int trainRows = features.rows() - testRows;
+    // shuffle data
+    std::srand(std::time(nullptr));
+    auto engine = std::default_random_engine{};
+    std::shuffle(data.begin(), data.end(), engine);
 
-    Matrix<U> test(testRows, allRandom.cols());
-    Matrix<U> train(trainRows, allRandom.cols());
-
-    for (int i = 0; i < allRandom.rows(); ++i)
+    for (unsigned int i = 0; i < data.size(); ++i)
     {
-        if (i < testRows)
-        {
-            test.setOneRow(i, allRandom.getOneRow(i));
-        }
+        if (i < testCol)
+            test.push_back(data.at(i));
         else
-        {
-            train.setOneRow(i - testRows, allRandom.getOneRow(i));
-        }
+            train.push_back(data.at(i));
     }
-    std::vector<Matrix<U>> testVec = test.splitMatrix(features.cols());
-    std::vector<Matrix<U>> trainVec = train.splitMatrix(features.cols());
-    std::vector<std::vector<Matrix<U>>> trainTestVec = {testVec, trainVec};
-    return trainTestVec;
+    return std::make_tuple(train, test);
 }
 
 #endif // __MATRIX__H__

@@ -142,12 +142,14 @@ void testNeuralNet()
     for (auto &bias : biases)
     {
         bias.showShape(); // (8, 1), (3, 1)
+        std::cout << std::endl;
     }
     std::cout << "Weights shape" << std::endl;
     auto weights = nn.getWeights();
     for (auto &weight : weights)
     {
         weight.showShape(); // (8, 4), (3, 8)
+        std::cout << std::endl;
     }
 
     // test feedforward function
@@ -175,20 +177,25 @@ void testNeuralNet()
         break;
     }
 
-    // TODO: create training data
-    // std::vector<Matrix<double>> trainingData;
-    // trainingData.push_back(input);
-    // trainingData.push_back(oneHotLabels);
+    // test loss function
+    Matrix<double> yTrue(3, 1);
+    yTrue.fill(0.1);
+    std::cout << "Loss: " << std::endl;
+    std::cout << nn.loss(yTrue, output) << std::endl;
 
-    // auto trainTestData = trainTestSplit(trainingData, 0.25);
+    // tuples: (X, y)
+    auto data = convertData(input.transpose(), oneHotLabels.transpose());
 
-    // auto testData = trainTestData.at(0);
-    // auto trainData = trainTestData.at(1);
+    // train/test split
+    auto trainTest = trainTestSplit(data, 0.2);
+    auto trainData = std::get<0>(trainTest);
+    auto testData = std::get<1>(trainTest);
 
-    // int epochs = 10;
-    // int miniBatchSize = 5;
-    // double eta = 0.01;
-    // nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
+    // Stochastic gradient descent
+    int epochs = 10;
+    int miniBatchSize = 5;
+    double eta = 0.01;
+    nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
 }
 
 #endif // !__TESTS__

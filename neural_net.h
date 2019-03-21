@@ -8,7 +8,8 @@ class NeuralNet
 {
     /**
      * ``_sizes`` contains numbers of neurons in each layer
-     *  first layer is assumed to be input layer (is without bias)
+     *  first layer is assumed to be input layer (is without bias) 
+     *  the last layer - output
     **/
     int _numLayers;
     std::vector<int> _sizes;
@@ -20,8 +21,11 @@ class NeuralNet
     std::vector<Matrix<double>> getBiases() { return _biases; }
     std::vector<Matrix<double>> getWeights() { return _weights; }
     Matrix<double> feedforward(Matrix<double>);
-
-    int predict(Matrix<double>);
+    double loss(Matrix<double> &, Matrix<double> &);
+    void SGD(std::vector<std::vector<Matrix<double>>>, int, int, double, std::vector<std::vector<Matrix<double>>>);
+    int predict(Matrix<double> &);
 };
+
+std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);
 
 #endif // !__NEURAL_NET__
