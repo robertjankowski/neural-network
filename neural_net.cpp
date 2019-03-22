@@ -8,6 +8,8 @@
 #include <random>
 
 std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);
+void shuffleData(std::vector<std::vector<Matrix<double>>> &);
+std::vector<std::vector<std::vector<Matrix<double>>>> splitIntoMiniBatches(std::vector<std::vector<Matrix<double>>> &, int);
 
 NeuralNet::NeuralNet(std::vector<int> s) : _sizes(s)
 {
@@ -71,15 +73,50 @@ void NeuralNet::SGD(std::vector<std::vector<Matrix<double>>> trainData, int epoc
     for (int i = 0; i < epochs; ++i)
     {
         // shuffle training data
-
-        // create minibatches
-
-        // for m in minibatches: update_mini_batch
-
+        shuffleData(trainData);
+        // split into mini batches
+        auto miniBatches = splitIntoMiniBatches(trainData, miniBatchSize);
+        for (auto &batch : miniBatches)
+        {
+            // update_mini_batch
+            updateMiniBatch(batch, eta);
+        }
         // print loss
-
-        std::cout << "Epoch: " << i << "/" << epochs << " complete" << std::endl;
+        std::cout << "Epoch: " << i + 1 << "/" << epochs << " complete" << std::endl;
     }
+}
+
+void NeuralNet::updateMiniBatch(std::vector<std::vector<Matrix<double>>> &batch, double eta)
+{
+    auto nabla_b = _biases;
+    auto nable_w = _weights;
+    // fill zero
+    for (auto &b : nabla_b)
+    {
+        b.fill(0);
+    }
+    for (auto &w : nable_w)
+    {
+        w.fill(0);
+    }
+
+    //auto i : zip(_biases, _weights)
+    for (unsigned int i = 0; i < batch.size(); ++i)
+    {
+        auto X = batch.at(i).at(0);
+        auto y = batch.at(i).at(1);
+
+        auto afterBackProp = backprop(X, y);
+        auto delta_nabla_b = std::get<0>(afterBackProp);
+        auto delta_nable_w = std::get<1>(afterBackProp);
+
+        // TODO:
+    }
+}
+
+std::tuple<Matrix<double>, Matrix<double>> backprop(Matrix<double> X, Matrix<double> y)
+{
+    // TODO: read chapter
 }
 
 std::vector<std::vector<Matrix<double>>> convertData(Matrix<double> X, Matrix<double> y)
@@ -99,4 +136,23 @@ std::vector<std::vector<Matrix<double>>> convertData(Matrix<double> X, Matrix<do
         data.push_back(v);
     }
     return data;
+}
+
+void shuffleData(std::vector<std::vector<Matrix<double>>> &X)
+{
+    std::srand(std::time(nullptr));
+    auto engine = std::default_random_engine{};
+    std::shuffle(X.begin(), X.end(), engine);
+}
+
+std::vector<std::vector<std::vector<Matrix<double>>>> splitIntoMiniBatches(std::vector<std::vector<Matrix<double>>> &X,
+                                                                           int miniBatchSize)
+{
+    std::vector<std::vector<std::vector<Matrix<double>>>> miniBatches;
+    for (unsigned int i = 0; i < X.size(); i += miniBatchSize)
+    {
+        std::vector<std::vector<Matrix<double>>> batch(X.begin() + i, X.begin() + i + miniBatchSize);
+        miniBatches.push_back(batch);
+    }
+    return miniBatches;
 }

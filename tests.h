@@ -192,7 +192,7 @@ void testNeuralNet()
     auto testData = std::get<1>(trainTest);
 
     // Stochastic gradient descent
-    int epochs = 10;
+    int epochs = 1;
     int miniBatchSize = 5;
     double eta = 0.01;
     nn.SGD(trainData, epochs, miniBatchSize, eta, testData);

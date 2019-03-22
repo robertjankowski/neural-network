@@ -3,6 +3,7 @@
 
 #include "matrix.h"
 #include <vector>
+#include <tuple>
 
 class NeuralNet
 {
@@ -24,8 +25,12 @@ class NeuralNet
     double loss(Matrix<double> &, Matrix<double> &);
     void SGD(std::vector<std::vector<Matrix<double>>>, int, int, double, std::vector<std::vector<Matrix<double>>>);
     int predict(Matrix<double> &);
+    void updateMiniBatch(std::vector<std::vector<Matrix<double>>> &, double);
+    std::tuple<Matrix<double>, Matrix<double>> backprop(Matrix<double>, Matrix<double>);
 };
 
 std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);
+void shuffleData(std::vector<std::vector<Matrix<double>>> &);
+std::vector<std::vector<std::vector<Matrix<double>>>> splitIntoMiniBatches(std::vector<std::vector<Matrix<double>>> &, int);
 
 #endif // !__NEURAL_NET__
