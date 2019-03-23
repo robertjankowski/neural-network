@@ -6,10 +6,15 @@
 #include "matrix.h"
 #include "neural_net.h"
 #include <iomanip>
+#include <string>
 
-int main()
+int main(int argc, char *argv[])
 {
-    // TODO: add parameters to script, e.g. to select learning rate and epoches
+    if (argc != 4)
+    {
+        std::cerr << "Usage: <neuralnet> <epochs> <minibatchsize> <learning_rate>" << std::endl;
+        return 1;
+    }
 
     Loader l("iris.data", ',');
     auto input = l.getInput();
@@ -33,9 +38,9 @@ int main()
     auto trainData = std::get<0>(trainTest);
     auto testData = std::get<1>(trainTest);
 
-    int epochs = 100;
-    int miniBatchSize = 10;
-    double eta = 0.05;
+    int epochs = std::stoi(argv[1]);
+    int miniBatchSize = std::stoi(argv[2]);
+    double eta = std::stod(argv[3]);
     nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
 
     double accuracy = nn.accuracy(testData);

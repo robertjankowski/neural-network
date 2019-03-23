@@ -36,5 +36,7 @@
         "typeinfo": "cpp",
         "utility": "cpp",
         "iomanip": "cpp"
-    }
+    },
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "C_Cpp.configurationWarnings": "Disabled"
 }
