@@ -52,7 +52,9 @@ class Matrix
     template <class U>
     friend std::ostream &operator<<(std::ostream &, Matrix<U>);
     template <class U>
-    friend Matrix<U> mul(Matrix<U> &, Matrix<U> &);
+    friend Matrix<U> mul(Matrix<U>, Matrix<U>);
+    template <class U>
+    friend Matrix<U> dot(Matrix<U>, Matrix<U>);
     template <class U>
     friend std::tuple<std::vector<std::vector<Matrix<U>>>,
                       std::vector<std::vector<Matrix<U>>>>
@@ -369,7 +371,7 @@ std::ostream &operator<<(std::ostream &stream, Matrix<U> m)
 }
 
 template <class U>
-Matrix<U> mul(Matrix<U> &A, Matrix<U> &B)
+Matrix<U> mul(Matrix<U> A, Matrix<U> B)
 {
     if (A.cols() != B.rows())
     {
@@ -387,6 +389,28 @@ Matrix<U> mul(Matrix<U> &A, Matrix<U> &B)
                 accumulator += A.at(i, k) * B.at(k, j);
             }
             res.set(i, j, accumulator);
+        }
+    }
+    return res;
+}
+
+template <class U>
+Matrix<U> dot(Matrix<U> A, Matrix<U> B)
+{
+    /** 
+     * Hadamard product
+     */
+    if (A.cols() != B.cols() && A.rows() != B.rows())
+    {
+        throw std::invalid_argument("Cannot execute Hadamard product. Wrong shapes");
+    }
+    Matrix<U> res(A.rows(), A.cols());
+    for (int i = 0; i < A.rows(); ++i)
+    {
+        for (int j = 0; j < A.cols(); ++j)
+        {
+            U val = A.at(i, j) * B.at(i, j);
+            res.set(i, j, val);
         }
     }
     return res;

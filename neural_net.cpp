@@ -51,6 +51,21 @@ int NeuralNet::predict(Matrix<double> &input)
     return argMax;
 }
 
+double NeuralNet::accuracy(std::vector<std::vector<Matrix<double>>> testData)
+{
+    double accur = 0.0;
+    for (int i = 0; i < testData.size(); ++i)
+    {
+        auto X = testData.at(i).at(0);
+        auto y = testData.at(i).at(1);
+        int yArg = std::distance(y.begin(), std::max_element(y.begin(), y.end()));
+        int pred = predict(X);
+        if (yArg == pred)
+            accur += 1;
+    }
+    return accur / testData.size();
+}
+
 double NeuralNet::loss(Matrix<double> &yTrue, Matrix<double> &yPred)
 {
     // mean squared error - MSE
@@ -63,7 +78,7 @@ double NeuralNet::loss(Matrix<double> &yTrue, Matrix<double> &yPred)
     {
         l += pow(yTrue.at(i, 0) - yPred.at(i, 0), 2);
     }
-    return sqrt(l);
+    return 1.0 / (2 * yTrue.rows()) * sqrt(l);
 }
 
 void NeuralNet::SGD(std::vector<std::vector<Matrix<double>>> trainData, int epochs,
@@ -81,26 +96,33 @@ void NeuralNet::SGD(std::vector<std::vector<Matrix<double>>> trainData, int epoc
             // update_mini_batch
             updateMiniBatch(batch, eta);
         }
-        // print loss
-        std::cout << "Epoch: " << i + 1 << "/" << epochs << " complete" << std::endl;
+        // calculate loss
+        double l = 0.0;
+        for (auto &test : testData)
+        {
+            auto X_test = test.at(0);
+            auto y_test = test.at(1);
+            auto output = feedforward(X_test);
+            l += loss(y_test, output) / testData.size();
+        }
+        std::cout << "Epoch: " << i + 1 << "/" << epochs << " complete\tTest loss: " << l << std::endl;
     }
 }
 
 void NeuralNet::updateMiniBatch(std::vector<std::vector<Matrix<double>>> &batch, double eta)
 {
     auto nabla_b = _biases;
-    auto nable_w = _weights;
+    auto nabla_w = _weights;
     // fill zero
     for (auto &b : nabla_b)
     {
         b.fill(0);
     }
-    for (auto &w : nable_w)
+    for (auto &w : nabla_w)
     {
         w.fill(0);
     }
 
-    //auto i : zip(_biases, _weights)
     for (unsigned int i = 0; i < batch.size(); ++i)
     {
         auto X = batch.at(i).at(0);
@@ -108,15 +130,94 @@ void NeuralNet::updateMiniBatch(std::vector<std::vector<Matrix<double>>> &batch,
 
         auto afterBackProp = backprop(X, y);
         auto delta_nabla_b = std::get<0>(afterBackProp);
-        auto delta_nable_w = std::get<1>(afterBackProp);
+        auto delta_nabla_w = std::get<1>(afterBackProp);
 
-        // TODO:
+        for (unsigned int i = 0; i < nabla_b.size(); ++i)
+        {
+            auto nb = nabla_b.at(i);
+            auto dnb = delta_nabla_b.at(i);
+            nabla_b.at(i) = nb + dnb;
+        }
+        for (unsigned int i = 0; i < nabla_w.size(); ++i)
+        {
+            auto nw = nabla_w.at(i);
+            auto dnw = delta_nabla_w.at(i);
+            nabla_w.at(i) = nw + dnw;
+        }
+    }
+
+    // update weights and biases
+    for (unsigned int i = 0; i < _weights.size(); ++i)
+    {
+        auto w = _weights.at(i);
+        auto nw = nabla_w.at(i);
+        auto d = nw * (eta / batch.size());
+        _weights.at(i) = w - d;
+    }
+    for (unsigned int i = 0; i < _biases.size(); ++i)
+    {
+        auto b = _biases.at(i);
+        auto nb = nabla_b.at(i);
+        auto d = nb * (eta / batch.size());
+        _biases.at(i) = b - d;
     }
 }
 
-std::tuple<Matrix<double>, Matrix<double>> backprop(Matrix<double> X, Matrix<double> y)
+std::tuple<std::vector<Matrix<double>>, std::vector<Matrix<double>>> NeuralNet::backprop(Matrix<double> X, Matrix<double> y)
 {
-    // TODO: read chapter
+    auto nabla_b = _biases;
+    auto nabla_w = _weights;
+    // fill zero
+    for (auto &b : nabla_b)
+    {
+        b.fill(0);
+    }
+    for (auto &w : nabla_w)
+    {
+        w.fill(0);
+    }
+
+    // feedforward
+    auto activation = X;
+    std::vector<Matrix<double>> activations = {X};
+    std::vector<Matrix<double>> zs;
+
+    for (auto i : zip(_biases, _weights))
+    {
+        auto b = i.at(0);
+        auto w = i.at(1);
+
+        auto z = mul(w, activation) + b;
+        zs.push_back(z);
+        activation = applyActivation(Activation::sigmoid, z);
+        activations.push_back(activation);
+    }
+
+    // backward pass
+    auto delta = dot(costDerivative(activations.at(activations.size() - 1), y),
+                     applyActivation(Activation::sigmoidDerivative, zs.at(zs.size() - 1)));
+
+    nabla_b.at(nabla_b.size() - 1) = delta;
+    nabla_w.at(nabla_w.size() - 1) = mul(delta, activations.at(activations.size() - 2).transpose());
+
+    for (int l = 2; l < _numLayers; ++l)
+    {
+        auto z = zs.at(zs.size() - l);
+        auto sp = applyActivation(Activation::sigmoidDerivative, z);
+        delta = dot(mul(_weights.at(_weights.size() - l + 1).transpose(), delta), sp);
+        nabla_b.at(nabla_b.size() - l) = delta;
+        nabla_w.at(nabla_w.size() - l) = mul(delta, activations.at(activations.size() - l - 1).transpose());
+    }
+    return std::make_tuple(nabla_b, nabla_w);
+}
+
+Matrix<double> NeuralNet::costDerivative(Matrix<double> outputActivation, Matrix<double> y)
+{
+    /**
+     * return the vector of partial derivatives
+     * \partial C_x / \partial a
+     */
+    return (outputActivation - y);
 }
 
 std::vector<std::vector<Matrix<double>>> convertData(Matrix<double> X, Matrix<double> y)

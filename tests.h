@@ -8,6 +8,7 @@
 #include <iostream>
 #include "matrix.h"
 #include "neural_net.h"
+#include <iomanip>
 
 void testRandom()
 {
@@ -192,10 +193,14 @@ void testNeuralNet()
     auto testData = std::get<1>(trainTest);
 
     // Stochastic gradient descent
-    int epochs = 1;
-    int miniBatchSize = 5;
-    double eta = 0.01;
+    int epochs = 100;
+    int miniBatchSize = 10;
+    double eta = 0.05;
     nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
+
+    double accuracy = nn.accuracy(testData);
+    std::cout << std::setprecision(4);
+    std::cout << "Accuracy: " << accuracy << std::endl;
 }
 
 #endif // !__TESTS__

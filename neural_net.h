@@ -25,8 +25,10 @@ class NeuralNet
     double loss(Matrix<double> &, Matrix<double> &);
     void SGD(std::vector<std::vector<Matrix<double>>>, int, int, double, std::vector<std::vector<Matrix<double>>>);
     int predict(Matrix<double> &);
+    double accuracy(std::vector<std::vector<Matrix<double>>>);
     void updateMiniBatch(std::vector<std::vector<Matrix<double>>> &, double);
-    std::tuple<Matrix<double>, Matrix<double>> backprop(Matrix<double>, Matrix<double>);
+    std::tuple<std::vector<Matrix<double>>, std::vector<Matrix<double>>> backprop(Matrix<double>, Matrix<double>);
+    Matrix<double> costDerivative(Matrix<double>, Matrix<double>);
 };
 
 std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);
