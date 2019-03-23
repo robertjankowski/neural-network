@@ -3,7 +3,7 @@
 
 #include <string>
 #include <iostream>
-#include <vector>
+#include "matrix.h"
 
 class Iris
 {
@@ -16,7 +16,7 @@ class Iris
   public:
     Iris(double, double, double, double, std::string);
     friend std::ostream &operator<<(std::ostream &os, const Iris &i);
-    std::vector<double> getFeatures();
+    Matrix<double> getFeatures();
 };
 
 std::ostream &operator<<(std::ostream &os, const Iris &i);
