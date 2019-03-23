@@ -54,7 +54,7 @@ int NeuralNet::predict(Matrix<double> &input)
 double NeuralNet::accuracy(std::vector<std::vector<Matrix<double>>> testData)
 {
     double accur = 0.0;
-    for (int i = 0; i < testData.size(); ++i)
+    for (unsigned int i = 0; i < testData.size(); ++i)
     {
         auto X = testData.at(i).at(0);
         auto y = testData.at(i).at(1);

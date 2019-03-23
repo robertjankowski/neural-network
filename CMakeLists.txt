@@ -11,6 +11,7 @@ file(GLOB SOURCES "src/*.cpp" "*.cpp")
 add_executable(NeuralNetwork ${SOURCES})
 
 set_property(TARGET NeuralNetwork PROPERTY CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS -no-pie)
 
 target_compile_options(NeuralNetwork PRIVATE -Wall)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "neuralnet")
