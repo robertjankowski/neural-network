@@ -4,6 +4,11 @@
 #include "matrix.h"
 #include <vector>
 #include <tuple>
+#include <utility>
+
+// using own pair
+template <class T>
+using pair = std::pair<std::vector<Matrix<T>>, std::vector<Matrix<T>>>;
 
 class NeuralNet
 {
@@ -27,8 +32,9 @@ class NeuralNet
     int predict(Matrix<double> &);
     double accuracy(std::vector<std::vector<Matrix<double>>>);
     void updateMiniBatch(std::vector<std::vector<Matrix<double>>> &, double);
-    std::tuple<std::vector<Matrix<double>>, std::vector<Matrix<double>>> backprop(Matrix<double>, Matrix<double>);
+    pair<double> backprop(Matrix<double>, Matrix<double>);
     Matrix<double> costDerivative(Matrix<double>, Matrix<double>);
+    Matrix<double> confusionMatrix(std::vector<std::vector<Matrix<double>>>);
 };
 
 std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);

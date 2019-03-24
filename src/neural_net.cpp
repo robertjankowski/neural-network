@@ -129,8 +129,8 @@ void NeuralNet::updateMiniBatch(std::vector<std::vector<Matrix<double>>> &batch,
         auto y = batch.at(i).at(1);
 
         auto afterBackProp = backprop(X, y);
-        auto delta_nabla_b = std::get<0>(afterBackProp);
-        auto delta_nabla_w = std::get<1>(afterBackProp);
+        auto delta_nabla_b = afterBackProp.first;
+        auto delta_nabla_w = afterBackProp.second;
 
         for (unsigned int i = 0; i < nabla_b.size(); ++i)
         {
@@ -163,7 +163,7 @@ void NeuralNet::updateMiniBatch(std::vector<std::vector<Matrix<double>>> &batch,
     }
 }
 
-std::tuple<std::vector<Matrix<double>>, std::vector<Matrix<double>>> NeuralNet::backprop(Matrix<double> X, Matrix<double> y)
+pair<double> NeuralNet::backprop(Matrix<double> X, Matrix<double> y)
 {
     auto nabla_b = _biases;
     auto nabla_w = _weights;
@@ -208,7 +208,7 @@ std::tuple<std::vector<Matrix<double>>, std::vector<Matrix<double>>> NeuralNet::
         nabla_b.at(nabla_b.size() - l) = delta;
         nabla_w.at(nabla_w.size() - l) = mul(delta, activations.at(activations.size() - l - 1).transpose());
     }
-    return std::make_tuple(nabla_b, nabla_w);
+    return std::make_pair(nabla_b, nabla_w);
 }
 
 Matrix<double> NeuralNet::costDerivative(Matrix<double> outputActivation, Matrix<double> y)
@@ -218,6 +218,42 @@ Matrix<double> NeuralNet::costDerivative(Matrix<double> outputActivation, Matrix
      * \partial C_x / \partial a
      */
     return (outputActivation - y);
+}
+
+Matrix<double> NeuralNet::confusionMatrix(std::vector<std::vector<Matrix<double>>> testData)
+{
+    int shape = testData.at(0).at(1).rows();
+    Matrix<double> matrix(shape, shape);
+    matrix.fill(0);
+
+    for (unsigned int i = 0; i < testData.size(); ++i)
+    {
+        auto X = testData.at(i).at(0);
+        auto y = testData.at(i).at(1);
+        int yTrue = std::distance(y.begin(), std::max_element(y.begin(), y.end()));
+        int yPred = predict(X);
+
+        // TODO: very wrong way, refactor it later
+        if (yTrue == 0 && yPred == 0)
+            matrix.set(0, 0, matrix.at(0, 0) + 1);
+        else if (yTrue == 1 && yPred == 1)
+            matrix.set(1, 1, matrix.at(1, 1) + 1);
+        else if (yTrue == 2 && yPred == 2)
+            matrix.set(2, 2, matrix.at(2, 2) + 1);
+        else if (yTrue == 0 && yPred == 1)
+            matrix.set(0, 1, matrix.at(0, 1) + 1);
+        else if (yTrue == 1 && yPred == 0)
+            matrix.set(1, 0, matrix.at(1, 0) + 1);
+        else if (yTrue == 2 && yPred == 0)
+            matrix.set(2, 0, matrix.at(2, 0) + 1);
+        else if (yTrue == 0 && yPred == 2)
+            matrix.set(0, 2, matrix.at(0, 2) + 1);
+        else if (yTrue == 1 && yPred == 2)
+            matrix.set(1, 2, matrix.at(1, 2) + 1);
+        else if (yTrue == 2 && yPred == 1)
+            matrix.set(2, 1, matrix.at(2, 1) + 1);
+    }
+    return matrix;
 }
 
 std::vector<std::vector<Matrix<double>>> convertData(Matrix<double> X, Matrix<double> y)

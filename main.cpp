@@ -45,5 +45,9 @@ int main(int argc, char *argv[])
 
     double accuracy = nn.accuracy(testData);
     std::cout << std::setprecision(4);
-    std::cout << "Accuracy: " << accuracy << std::endl;
+    std::cout << "\nAccuracy: " << accuracy << std::endl;
+
+    auto confusionMatrix = nn.confusionMatrix(testData);
+    std::cout << "\nConfunsion matrix" << std::endl;
+    std::cout << confusionMatrix << std::endl;
 }
