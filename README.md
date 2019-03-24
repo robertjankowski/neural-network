@@ -25,21 +25,31 @@ nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
 
 double accuracy = nn.accuracy(testData);
 std::cout << "Accuracy: " << accuracy << std::endl;
+
+auto confusionMatrix = nn.confusionMatrix(testData);
+std::cout << "Confunsion matrix" << std::endl;
+std::cout << confusionMatrix << std::endl;
 ```
 
 Output:
 ```
-Epoch: 1/10 complete    Test loss: 0.123425
-Epoch: 2/10 complete    Test loss: 0.112543
-Epoch: 3/10 complete    Test loss: 0.107681
-Epoch: 4/10 complete    Test loss: 0.104236
-Epoch: 5/10 complete    Test loss: 0.10241
-Epoch: 6/10 complete    Test loss: 0.10078
-Epoch: 7/10 complete    Test loss: 0.0988746
-Epoch: 8/10 complete    Test loss: 0.097413
-Epoch: 9/10 complete    Test loss: 0.0962183
-Epoch: 10/10 complete   Test loss: 0.0950714
-Accuracy: 0.8
+Epoch: 1/10 complete    Test loss: 0.149012
+Epoch: 2/10 complete    Test loss: 0.139139
+Epoch: 3/10 complete    Test loss: 0.134284
+Epoch: 4/10 complete    Test loss: 0.129532
+Epoch: 5/10 complete    Test loss: 0.125607
+Epoch: 6/10 complete    Test loss: 0.121967
+Epoch: 7/10 complete    Test loss: 0.118834
+Epoch: 8/10 complete    Test loss: 0.115805
+Epoch: 9/10 complete    Test loss: 0.113544
+Epoch: 10/10 complete   Test loss: 0.11129
+
+Accuracy: 0.8667
+
+Confunsion matrix
+10 0 0 
+0 6 3 
+0 1 10
 ```
 
 
