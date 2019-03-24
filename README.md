@@ -1,6 +1,7 @@
 # Implementation of multilayer perceptron in pure C++
 
-> Based on http://code-spot.co.za/2009/10/08/15-steps-to-implemented-a-neural-net/ and http://neuralnetworksanddeeplearning.com/chap1.html 
+> Based on [15 Steps to Implement a Neural Net](http://code-spot.co.za/2009/10/08/15-steps-to-implemented-a-neural-net/) and 
+[Using neural nets to recognize handwritten digits](http://neuralnetworksanddeeplearning.com/chap1.html)
 
 
 ## Simple architecture for predicting **Iris** species (one or more hidden layers is possible)
@@ -47,6 +48,7 @@ Accuracy: 0.8
 
 tested on Ubuntu 18.04.2 LTS 
 ```console
+cmake .
 cmake --build .
 bin/neuralnet <epochs> <minibatchSize> <learningRate>
 ```
