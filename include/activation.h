@@ -5,15 +5,16 @@
 #include <functional>
 #include "matrix.h"
 
+using fActivation = std::function<double(double)>;
+
 namespace Activation
 {
 double sigmoid(double);
-double tanh(double);
 double relu(double);
 double leakyRelu(double);
 double sigmoidDerivative(double);
 } // namespace Activation
 
-Matrix<double> applyActivation(std::function<double(double)>, Matrix<double>);
+Matrix<double> applyActivation(fActivation, Matrix<double>);
 
 #endif // __ACTIVATION__H__

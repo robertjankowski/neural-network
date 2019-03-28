@@ -5,8 +5,6 @@
 #include <iostream>
 #include <map>
 
-void removeDuplicates(std::vector<std::string> &);
-
 void Encoder::fit(std::vector<std::string> input)
 {
     std::vector<std::string> classes = input;

@@ -2,13 +2,20 @@
 #define __NEURAL_NET__
 
 #include "matrix.h"
-#include <vector>
-#include <tuple>
+#include "activation.h"
 #include <utility>
 
-// using own pair
 template <class T>
 using pair = std::pair<std::vector<Matrix<T>>, std::vector<Matrix<T>>>;
+
+template <class T>
+using miniBatchVector = std::vector<std::vector<std::vector<Matrix<T>>>>;
+
+template <class T>
+using dataVector = std::vector<std::vector<Matrix<T>>>;
+
+template <class T>
+using matrixVector = std::vector<Matrix<T>>;
 
 class NeuralNet
 {
@@ -19,26 +26,32 @@ class NeuralNet
     **/
     int _numLayers;
     std::vector<int> _sizes;
-    std::vector<Matrix<double>> _weights;
-    std::vector<Matrix<double>> _biases;
+    matrixVector<double> _weights;
+    matrixVector<double> _biases;
 
   public:
     NeuralNet(std::vector<int>);
-    std::vector<Matrix<double>> getBiases() { return _biases; }
-    std::vector<Matrix<double>> getWeights() { return _weights; }
+    matrixVector<double> getBiases() { return _biases; }
+    matrixVector<double> getWeights() { return _weights; }
     Matrix<double> feedforward(Matrix<double>);
+    void feedforward(matrixVector<double> &, Matrix<double> &, matrixVector<double> &);
     double loss(Matrix<double> &, Matrix<double> &);
-    void SGD(std::vector<std::vector<Matrix<double>>>, int, int, double, std::vector<std::vector<Matrix<double>>>);
+    void SGD(dataVector<double> &, int, int, double, dataVector<double> &);
     int predict(Matrix<double> &);
-    double accuracy(std::vector<std::vector<Matrix<double>>>);
-    void updateMiniBatch(std::vector<std::vector<Matrix<double>>> &, double);
-    pair<double> backprop(Matrix<double>, Matrix<double>);
+    double accuracy(dataVector<double> &);
+    void updateMiniBatch(dataVector<double> &, double);
+    void updateWeightsAndBiases(matrixVector<double> &, matrixVector<double> &, unsigned int, double);
+    pair<double> backprop(Matrix<double> &, Matrix<double> &);
     Matrix<double> costDerivative(Matrix<double>, Matrix<double>);
-    Matrix<double> confusionMatrix(std::vector<std::vector<Matrix<double>>>);
+    Matrix<double> confusionMatrix(dataVector<double>);
+    void backwardPass(matrixVector<double> &, matrixVector<double> &,
+                      matrixVector<double> &, matrixVector<double> &, Matrix<double> &);
 };
 
-std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);
-void shuffleData(std::vector<std::vector<Matrix<double>>> &);
-std::vector<std::vector<std::vector<Matrix<double>>>> splitIntoMiniBatches(std::vector<std::vector<Matrix<double>>> &, int);
+dataVector<double> convertData(Matrix<double>, Matrix<double>);
+void shuffleData(dataVector<double> &);
+miniBatchVector<double> splitIntoMiniBatches(dataVector<double> &, int);
+std::pair<dataVector<double>, dataVector<double>> trainTestSplit(dataVector<double> &, double);
+matrixVector<double> fillZeros(matrixVector<double> &);
 
 #endif // !__NEURAL_NET__

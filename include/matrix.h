@@ -55,10 +55,6 @@ class Matrix
     friend Matrix<U> mul(Matrix<U>, Matrix<U>);
     template <class U>
     friend Matrix<U> dot(Matrix<U>, Matrix<U>);
-    template <class U>
-    friend std::tuple<std::vector<std::vector<Matrix<U>>>,
-                      std::vector<std::vector<Matrix<U>>>>
-    trainTestSplit(std::vector<std::vector<Matrix<U>>>, double);
 };
 
 template <class T>
@@ -414,31 +410,6 @@ Matrix<U> dot(Matrix<U> A, Matrix<U> B)
         }
     }
     return res;
-}
-
-template <class U>
-std::tuple<std::vector<std::vector<Matrix<U>>>,
-           std::vector<std::vector<Matrix<U>>>>
-trainTestSplit(std::vector<std::vector<Matrix<U>>> data, double testSize)
-{
-    unsigned int testCol = (int)(data.size() * testSize);
-
-    std::vector<std::vector<Matrix<U>>> test;
-    std::vector<std::vector<Matrix<U>>> train;
-
-    // shuffle data
-    std::srand(std::time(nullptr));
-    auto engine = std::default_random_engine{};
-    std::shuffle(data.begin(), data.end(), engine);
-
-    for (unsigned int i = 0; i < data.size(); ++i)
-    {
-        if (i < testCol)
-            test.push_back(data.at(i));
-        else
-            train.push_back(data.at(i));
-    }
-    return std::make_tuple(train, test);
 }
 
 #endif // __MATRIX__H__

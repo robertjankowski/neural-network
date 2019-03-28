@@ -1,8 +1,7 @@
 #include "activation.h"
 #include <cmath>
-#include <functional>
 
-Matrix<double> applyActivation(std::function<double(double)> f, Matrix<double> X)
+Matrix<double> applyActivation(fActivation f, Matrix<double> X)
 {
     int cols = X.cols();
     int rows = X.rows();
@@ -20,10 +19,6 @@ Matrix<double> applyActivation(std::function<double(double)> f, Matrix<double> X
 double Activation::sigmoid(double x)
 {
     return 1 / (1 + exp(-x));
-}
-double Activation::tanh(double x)
-{
-    return std::tanh(x);
 }
 double Activation::relu(double x)
 {
