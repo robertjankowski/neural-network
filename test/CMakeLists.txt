@@ -1,0 +1,2 @@
+project(NeuralNetworkTest)
+add_executable(NeuralNetworkTest test.cpp)

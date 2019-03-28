@@ -70,3 +70,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 bin/neuralnet
+test/CMakeFiles
+test/cmake_install.cmake
+test/CMakeCache.txt
+test/Makefile
+test/NeuralNetworkTest
