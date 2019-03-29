@@ -7,10 +7,6 @@
 #include <cmath>
 #include <random>
 
-std::vector<std::vector<Matrix<double>>> convertData(Matrix<double>, Matrix<double>);
-void shuffleData(std::vector<std::vector<Matrix<double>>> &);
-std::vector<std::vector<std::vector<Matrix<double>>>> splitIntoMiniBatches(std::vector<std::vector<Matrix<double>>> &, int);
-
 NeuralNet::NeuralNet(std::vector<int> s) : _sizes(s)
 {
     _numLayers = _sizes.size();
@@ -19,7 +15,7 @@ NeuralNet::NeuralNet(std::vector<int> s) : _sizes(s)
     for (auto i : zip(to, from))
     {
         Matrix<double> weight(i.at(1), i.at(0));
-        weight.fillGauss(0, 1); // mean=0, variance=1
+        weight.fillGauss(0, 1);
         _weights.push_back(weight);
     }
 
@@ -27,13 +23,12 @@ NeuralNet::NeuralNet(std::vector<int> s) : _sizes(s)
     {
         int cols = _sizes.at(i);
         Matrix<double> bias(cols, 1);
-        bias.fillGauss(0, 1); // mean = 0, variance = 1
+        bias.fillGauss(0, 1);
         _biases.push_back(bias);
     }
 }
 Matrix<double> NeuralNet::feedforward(Matrix<double> a)
 {
-    // return output of network if `a` is input
     for (auto i : zip(_biases, _weights))
     {
         auto b = i.at(0);
@@ -51,7 +46,7 @@ int NeuralNet::predict(Matrix<double> &input)
     return argMax;
 }
 
-double NeuralNet::accuracy(std::vector<std::vector<Matrix<double>>> testData)
+double NeuralNet::accuracy(dataVector<double> &testData)
 {
     double accur = 0.0;
     for (unsigned int i = 0; i < testData.size(); ++i)
@@ -71,32 +66,23 @@ double NeuralNet::loss(Matrix<double> &yTrue, Matrix<double> &yPred)
     // mean squared error - MSE
     double l;
     if (yTrue.rows() != yPred.rows())
-    {
         std::cerr << "Wrong matrices shape" << std::endl;
-    }
     for (int i = 0; i < yTrue.rows(); ++i)
-    {
         l += pow(yTrue.at(i, 0) - yPred.at(i, 0), 2);
-    }
     return 1.0 / (2 * yTrue.rows()) * sqrt(l);
 }
 
-void NeuralNet::SGD(std::vector<std::vector<Matrix<double>>> trainData, int epochs,
-                    int miniBatchSize, double eta, std::vector<std::vector<Matrix<double>>> testData)
+void NeuralNet::SGD(dataVector<double> &trainData, int epochs, int miniBatchSize, double eta,
+                    dataVector<double> &testData)
 {
 
     for (int i = 0; i < epochs; ++i)
     {
-        // shuffle training data
         shuffleData(trainData);
-        // split into mini batches
         auto miniBatches = splitIntoMiniBatches(trainData, miniBatchSize);
         for (auto &batch : miniBatches)
-        {
-            // update_mini_batch
             updateMiniBatch(batch, eta);
-        }
-        // calculate loss
+
         double l = 0.0;
         for (auto &test : testData)
         {
@@ -109,19 +95,10 @@ void NeuralNet::SGD(std::vector<std::vector<Matrix<double>>> trainData, int epoc
     }
 }
 
-void NeuralNet::updateMiniBatch(std::vector<std::vector<Matrix<double>>> &batch, double eta)
+void NeuralNet::updateMiniBatch(dataVector<double> &batch, double eta)
 {
-    auto nabla_b = _biases;
-    auto nabla_w = _weights;
-    // fill zero
-    for (auto &b : nabla_b)
-    {
-        b.fill(0);
-    }
-    for (auto &w : nabla_w)
-    {
-        w.fill(0);
-    }
+    auto nabla_b = fillZeros(_biases);
+    auto nabla_w = fillZeros(_weights);
 
     for (unsigned int i = 0; i < batch.size(); ++i)
     {
@@ -145,43 +122,45 @@ void NeuralNet::updateMiniBatch(std::vector<std::vector<Matrix<double>>> &batch,
             nabla_w.at(i) = nw + dnw;
         }
     }
+    updateWeightsAndBiases(nabla_b, nabla_w, batch.size(), eta);
+}
 
-    // update weights and biases
+void NeuralNet::updateWeightsAndBiases(matrixVector<double> &nabla_b, matrixVector<double> &nabla_w,
+                                       unsigned int batchSize, double eta)
+{
     for (unsigned int i = 0; i < _weights.size(); ++i)
     {
         auto w = _weights.at(i);
         auto nw = nabla_w.at(i);
-        auto d = nw * (eta / batch.size());
+        auto d = nw * (eta / batchSize);
         _weights.at(i) = w - d;
     }
     for (unsigned int i = 0; i < _biases.size(); ++i)
     {
         auto b = _biases.at(i);
         auto nb = nabla_b.at(i);
-        auto d = nb * (eta / batch.size());
+        auto d = nb * (eta / batchSize);
         _biases.at(i) = b - d;
     }
 }
 
-pair<double> NeuralNet::backprop(Matrix<double> X, Matrix<double> y)
+pair<double> NeuralNet::backprop(Matrix<double> &X, Matrix<double> &y)
 {
-    auto nabla_b = _biases;
-    auto nabla_w = _weights;
-    // fill zero
-    for (auto &b : nabla_b)
-    {
-        b.fill(0);
-    }
-    for (auto &w : nabla_w)
-    {
-        w.fill(0);
-    }
+    auto nabla_b = fillZeros(_biases);
+    auto nabla_w = fillZeros(_weights);
 
     // feedforward
     auto activation = X;
-    std::vector<Matrix<double>> activations = {X};
-    std::vector<Matrix<double>> zs;
+    matrixVector<double> activations = {X};
+    matrixVector<double> zs;
+    feedforward(activations, activation, zs);
 
+    backwardPass(nabla_b, nabla_w, activations, zs, y);
+    return std::make_pair(nabla_b, nabla_w);
+}
+
+void NeuralNet::feedforward(matrixVector<double> &activations, Matrix<double> &activation, matrixVector<double> &zs)
+{
     for (auto i : zip(_biases, _weights))
     {
         auto b = i.at(0);
@@ -192,8 +171,11 @@ pair<double> NeuralNet::backprop(Matrix<double> X, Matrix<double> y)
         activation = applyActivation(Activation::sigmoid, z);
         activations.push_back(activation);
     }
+}
 
-    // backward pass
+void NeuralNet::backwardPass(matrixVector<double> &nabla_b, matrixVector<double> &nabla_w,
+                             matrixVector<double> &activations, matrixVector<double> &zs, Matrix<double> &y)
+{
     auto delta = dot(costDerivative(activations.at(activations.size() - 1), y),
                      applyActivation(Activation::sigmoidDerivative, zs.at(zs.size() - 1)));
 
@@ -208,7 +190,6 @@ pair<double> NeuralNet::backprop(Matrix<double> X, Matrix<double> y)
         nabla_b.at(nabla_b.size() - l) = delta;
         nabla_w.at(nabla_w.size() - l) = mul(delta, activations.at(activations.size() - l - 1).transpose());
     }
-    return std::make_pair(nabla_b, nabla_w);
 }
 
 Matrix<double> NeuralNet::costDerivative(Matrix<double> outputActivation, Matrix<double> y)
@@ -220,7 +201,7 @@ Matrix<double> NeuralNet::costDerivative(Matrix<double> outputActivation, Matrix
     return (outputActivation - y);
 }
 
-Matrix<double> NeuralNet::confusionMatrix(std::vector<std::vector<Matrix<double>>> testData)
+Matrix<double> NeuralNet::confusionMatrix(dataVector<double> testData)
 {
     int shape = testData.at(0).at(1).rows();
     Matrix<double> matrix(shape, shape);
@@ -256,7 +237,7 @@ Matrix<double> NeuralNet::confusionMatrix(std::vector<std::vector<Matrix<double>
     return matrix;
 }
 
-std::vector<std::vector<Matrix<double>>> convertData(Matrix<double> X, Matrix<double> y)
+dataVector<double> convertData(Matrix<double> X, Matrix<double> y)
 {
     /**
      * Input: X shape : (features, no. of instances)
@@ -266,30 +247,54 @@ std::vector<std::vector<Matrix<double>>> convertData(Matrix<double> X, Matrix<do
      *    where X' shape : (features, 1)
      *          y' shape : (labels,   1)
      */
-    std::vector<std::vector<Matrix<double>>> data;
+    dataVector<double> data;
     for (int i = 0; i < X.cols(); ++i)
     {
-        std::vector<Matrix<double>> v = {X.getOneCol(i), y.getOneCol(i)};
+        matrixVector<double> v = {X.getOneCol(i), y.getOneCol(i)};
         data.push_back(v);
     }
     return data;
 }
 
-void shuffleData(std::vector<std::vector<Matrix<double>>> &X)
+void shuffleData(dataVector<double> &X)
 {
     std::srand(std::time(nullptr));
     auto engine = std::default_random_engine{};
     std::shuffle(X.begin(), X.end(), engine);
 }
 
-std::vector<std::vector<std::vector<Matrix<double>>>> splitIntoMiniBatches(std::vector<std::vector<Matrix<double>>> &X,
-                                                                           int miniBatchSize)
+miniBatchVector<double> splitIntoMiniBatches(dataVector<double> &X, int miniBatchSize)
 {
-    std::vector<std::vector<std::vector<Matrix<double>>>> miniBatches;
+    miniBatchVector<double> miniBatches;
     for (unsigned int i = 0; i < X.size(); i += miniBatchSize)
     {
-        std::vector<std::vector<Matrix<double>>> batch(X.begin() + i, X.begin() + i + miniBatchSize);
+        dataVector<double> batch(X.begin() + i, X.begin() + i + miniBatchSize);
         miniBatches.push_back(batch);
     }
     return miniBatches;
+}
+
+std::pair<dataVector<double>, dataVector<double>> trainTestSplit(dataVector<double> &data, double testSize)
+{
+    unsigned int testCol = (int)(data.size() * testSize);
+    dataVector<double> test;
+    dataVector<double> train;
+
+    shuffleData(data);
+    for (unsigned int i = 0; i < data.size(); ++i)
+    {
+        if (i < testCol)
+            test.push_back(data.at(i));
+        else
+            train.push_back(data.at(i));
+    }
+    return std::make_pair(train, test);
+}
+
+matrixVector<double> fillZeros(matrixVector<double> &X)
+{
+    matrixVector<double> zeros = X;
+    for (auto &z : zeros)
+        z.fill(0);
+    return zeros;
 }

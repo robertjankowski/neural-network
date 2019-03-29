@@ -48,7 +48,7 @@ void testActivationFunctions()
     std::cout << Y << std::endl;
 
     std::cout << "After tan hyberbolic" << '\n';
-    auto Z = applyActivation(Activation::tanh, X);
+    auto Z = applyActivation(Activation::sigmoid, X);
     std::cout << Z << std::endl;
     auto Z1 = Z * 2;
     std::cout << Z1 << std::endl;
