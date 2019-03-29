@@ -1,14 +1,14 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 project(NeuralNetwork)
-
-include_directories("${PROJECT_SOURCE_DIR}/include")
-file(GLOB SOURCES "src/*.cpp" "*.cpp")
+file(GLOB SOURCES "src/*.cpp" "main.cpp")
 add_executable(NeuralNetwork ${SOURCES})
+
+include_directories(include)
 
 set_property(TARGET NeuralNetwork PROPERTY CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS -no-pie)

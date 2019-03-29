@@ -74,4 +74,5 @@ test/CMakeFiles
 test/cmake_install.cmake
 test/CMakeCache.txt
 test/Makefile
-test/NeuralNetworkTest
+test/test_neuralnet
+test/CTestTestfile.cmake
