@@ -55,13 +55,22 @@ Confunsion matrix
 
 
 ## Setup and run
+_tested on Ubuntu 18.04.2 LTS_
 
-tested on Ubuntu 18.04.2 LTS 
-```console
-cmake .
-cmake --build .
-bin/neuralnet <epochs> <minibatchSize> <learningRate>
+To clean cmake, rebuild project and run program with default parameters
+```bash
+./run.sh
 ```
+Example (let's say I'm in main folder)
+```bash
+file=$(pwd)"/iris.data"
+epochs=100
+miniBatch=2
+learningRate=0.1
+
+bin/neuralnet $file $epochs $miniBatch $learningRate
+```
+
 
 ## Comparision to `PyTorch` and `Keras`
 
