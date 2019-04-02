@@ -5,8 +5,6 @@
 #include <vector>
 #include <sstream>
 
-std::vector<std::string> splitByDelim(std::string input, char delimiter);
-
 Loader::Loader(const char *path, char delimiter)
 {
     std::ifstream file(path, std::ios::in);

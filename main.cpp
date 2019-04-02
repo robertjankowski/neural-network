@@ -10,13 +10,13 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 4)
+    if (argc != 5)
     {
-        std::cerr << "Usage: <neuralnet> <epochs> <minibatchsize> <learning_rate>" << std::endl;
+        std::cerr << "Usage: <neuralnet> <path_to_file> <epochs> <minibatchsize> <learning_rate>" << std::endl;
         return 1;
     }
 
-    Loader l("iris.data", ',');
+    Loader l(argv[1], ',');
     auto input = l.getInput();
     auto classes = l.getClasses();
     // encode string to int
@@ -36,9 +36,9 @@ int main(int argc, char *argv[])
     auto trainData = trainTest.first;
     auto testData = trainTest.second;
 
-    int epochs = std::stoi(argv[1]);
-    int miniBatchSize = std::stoi(argv[2]);
-    double eta = std::stod(argv[3]);
+    int epochs = std::stoi(argv[2]);
+    int miniBatchSize = std::stoi(argv[3]);
+    double eta = std::stod(argv[4]);
     nn.SGD(trainData, epochs, miniBatchSize, eta, testData);
 
     double accuracy = nn.accuracy(testData);

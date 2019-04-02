@@ -109,17 +109,17 @@ void NeuralNet::updateMiniBatch(dataVector<double> &batch, double eta)
         auto delta_nabla_b = afterBackProp.first;
         auto delta_nabla_w = afterBackProp.second;
 
-        for (unsigned int i = 0; i < nabla_b.size(); ++i)
+        for (unsigned int j = 0; j < nabla_b.size(); ++j)
         {
-            auto nb = nabla_b.at(i);
-            auto dnb = delta_nabla_b.at(i);
-            nabla_b.at(i) = nb + dnb;
+            auto nb = nabla_b.at(j);
+            auto dnb = delta_nabla_b.at(j);
+            nabla_b.at(j) = nb + dnb;
         }
-        for (unsigned int i = 0; i < nabla_w.size(); ++i)
+        for (unsigned int j = 0; j < nabla_w.size(); ++j)
         {
-            auto nw = nabla_w.at(i);
-            auto dnw = delta_nabla_w.at(i);
-            nabla_w.at(i) = nw + dnw;
+            auto nw = nabla_w.at(j);
+            auto dnw = delta_nabla_w.at(j);
+            nabla_w.at(j) = nw + dnw;
         }
     }
     updateWeightsAndBiases(nabla_b, nabla_w, batch.size(), eta);
