@@ -2,6 +2,49 @@
 
 #include "catch.hpp"
 #include "../include/neural_net.h"
+#include "../include/loader.h"
+#include <string>
+#include <vector>
+#include "../include/encoder.h"
+
+TEST_CASE("Testing loader", "[loader]")
+{
+    std::string toSplit = "a.b.c";
+    auto split = splitByDelim(toSplit, '.');
+    SECTION("Split by dot")
+    {
+        REQUIRE(split.at(0) == "a");
+        REQUIRE(split.at(1) == "b");
+        REQUIRE(split.at(2) == "c");
+    }
+
+    SECTION("Wrong file path")
+    {
+        auto path = "wrong_file.data";
+        REQUIRE_THROWS_AS(Loader(path, '.'), std::invalid_argument);
+    }
+}
+
+TEST_CASE("Testing encoders", "[encoder]")
+{
+    std::vector<std::string> vec = {"a", "a", "b", "c"};
+    Encoder e;
+    e.fit(vec);
+
+    SECTION("Encoder")
+    {
+        REQUIRE(e.getNClasses() == 3);
+        REQUIRE(e.getLabels() == std::vector<int>{0, 0, 1, 2});
+    }
+
+    SECTION("Onehot encoder")
+    {
+        OneHotEncoder oneHot;
+        oneHot.toOneHot(e.getLabels());
+        auto oneHotMatrix = oneHot.getOneHot();
+        REQUIRE(oneHotMatrix.cols() == 3);
+    }
+}
 
 TEST_CASE("Testing matrix", "[matrix]")
 {
