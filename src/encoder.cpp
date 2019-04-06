@@ -17,6 +17,7 @@ void Encoder::fit(std::vector<std::string> input)
     {
         _labels.push_back(_classes.at(s));
     }
+    _nClasses = classes.size();
 }
 
 void removeDuplicates(std::vector<std::string> &vec)

@@ -63,6 +63,14 @@ cmake --build .
 bin/neuralnet <epochs> <minibatchSize> <learningRate>
 ```
 
+## Tests
+
+```console
+cd test
+cmake . && make
+./test_neuralnet
+```
+
 ## Comparision to `PyTorch` and `Keras`
 
 Look at **jupyter_notebooks** directory

@@ -28,7 +28,7 @@ Loader::Loader(const char *path, char delimiter)
         file.close();
     }
     else
-        std::cout << "Unable to open file" << std::endl;
+        throw std::invalid_argument("Unable to open file");
 }
 
 Matrix<double> Loader::getInput()
