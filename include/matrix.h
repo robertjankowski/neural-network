@@ -27,8 +27,8 @@ class Matrix
     int rows() { return _X.size(); }
     int cols() { return _X[0].size(); }
     void resize(const int &, const int &);
-    typename std::vector<std::vector<T>>::iterator begin() { return _X.begin(); }
-    typename std::vector<std::vector<T>>::iterator end() { return _X.end(); }
+    auto begin() { return _X.begin(); }
+    auto end() { return _X.end(); }
     Matrix operator*(double);
     Matrix operator-(Matrix &);
     Matrix operator+(Matrix &);

@@ -10,7 +10,7 @@ add_executable(NeuralNetwork ${SOURCES})
 
 include_directories(include)
 
-set_property(TARGET NeuralNetwork PROPERTY CXX_STANDARD 11)
+set_property(TARGET NeuralNetwork PROPERTY CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-no-pie -Wall -Wshadow -Wextra -pedantic")
 
 target_compile_options(NeuralNetwork PRIVATE -Wall)
