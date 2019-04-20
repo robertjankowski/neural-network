@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/robertjankowski/neural-network.svg?branch=master)](https://travis-ci.org/robertjankowski/neural-network)
+
 # Implementation of multilayer perceptron in pure C++
 
 > Based on [15 Steps to Implement a Neural Net](http://code-spot.co.za/2009/10/08/15-steps-to-implemented-a-neural-net/) and 
