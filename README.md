@@ -4,9 +4,12 @@
 [Using neural nets to recognize handwritten digits](http://neuralnetworksanddeeplearning.com/chap1.html)
 
 
-## Simple architecture for predicting **Iris** species (one or more hidden layers is possible)
+## Simple architecture for predicting **Iris** species
+**one or more hidden layers is possible**
 
-<img src="neural_net.png" width="50%" height="50%" align="middle">
+<p align ="center">
+    <img src="neural_net.png" width="50%" height="50%">
+</p>
 
 ## Example
 
@@ -61,7 +64,7 @@ To clean cmake, rebuild project and run program with default parameters
 ```bash
 ./run.sh
 ```
-Example (let's say I'm in main folder)
+Example (let's say I'm in main folder). To run program you need to specify path to data, number of epochs, size of mini batches and learning rate.
 ```bash
 file=$(pwd)"/iris.data"
 epochs=100
