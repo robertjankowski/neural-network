@@ -15,4 +15,7 @@ script:
   - cmake --version
   - cmake CMakeLists.txt
   - cmake  --build .
-  - cmake --build test
+  - cd test
+  - cmake CMakeLists.txt
+  - cmake --build .
+  - ./test_neuralnet
