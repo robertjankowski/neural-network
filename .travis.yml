@@ -15,4 +15,5 @@ script:
   - cmake --version
   - cmake CMakeLists.txt
   - cmake  --build .
-  - cmake --build test
+  - ls
+  - pwd
